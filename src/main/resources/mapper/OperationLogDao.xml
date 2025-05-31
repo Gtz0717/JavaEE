@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.test_e.dao.OperationLogMapper">
+
+    <resultMap id="operationLogResultMap" type="com.test_e.entity.Operation_log">
+        <id property="logId" column="log_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="operation" column="operation"/>
+        <result property="method" column="method"/>
+        <result property="params" column="params"/>
+        <result property="ip" column="ip"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <select id="selectOperationLogs" resultMap="operationLogResultMap">
+        SELECT log_id, user_id, operation, method, params, ip, create_time
+        FROM operation_log
+        WHERE 1=1
+        <if test="startTime != null and startTime != ''">
+            AND create_time >= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND create_time &lt;= #{endTime}
+        </if>
+        <if test="operation != null and operation != ''">
+            AND operation = #{operation}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <insert id="insertOperationLog" parameterType="com.test_e.entity.Operation_log" useGeneratedKeys="true" keyProperty="logId">
+        INSERT INTO operation_log (
+            user_id, operation, method, params, ip, create_time
+        ) VALUES (
+                     #{userId}, #{operation}, #{method}, #{params}, #{ip}, NOW()
+                 )
+    </insert>
+
+</mapper>

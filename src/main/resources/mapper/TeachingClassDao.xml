@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.test_e.dao.TeachingClassMapper">
+
+    <resultMap id="teachingClassResultMap" type="com.test_e.entity.Teaching_class">
+        <id property="classId" column="class_id"/>
+        <result property="courseId" column="course_id"/>
+        <result property="className" column="class_name"/>
+        <result property="teacherId" column="teacher_id"/>
+        <result property="classTime" column="class_time"/>
+        <result property="classroom" column="classroom"/>
+        <result property="capacity" column="capacity"/>
+        <result property="selected" column="selected"/>
+        <!-- 关联课程信息 -->
+        <association property="course" javaType="com.test_e.entity.Course">
+            <id property="courseId" column="course_id"/>
+            <result property="courseName" column="course_name"/>
+            <result property="credit" column="credit"/>
+        </association>
+    </resultMap>
+
+    <insert id="insertTeachingClass" parameterType="com.test_e.entity.Teaching_class" useGeneratedKeys="true" keyProperty="classId">
+        INSERT INTO teaching_class (
+            course_id, class_name, teacher_id, class_time,
+            classroom, capacity, selected
+        ) VALUES (
+                     #{courseId}, #{className}, #{teacherId}, #{classTime},
+                     #{classroom}, #{capacity}, #{selected}
+                 )
+    </insert>
+
+    <update id="updateTeachingClass" parameterType="com.test_e.entity.Teaching_class">
+        UPDATE teaching_class
+        SET class_name = #{className},
+            class_time = #{classTime},
+            classroom = #{classroom},
+            capacity = #{capacity}
+        WHERE class_id = #{classId}
+    </update>
+
+    <select id="selectTeachingClassById" resultMap="teachingClassResultMap">
+        SELECT tc.*, c.course_name, c.credit
+        FROM teaching_class tc
+                 JOIN course c ON tc.course_id = c.course_id
+        WHERE tc.class_id = #{classId}
+    </select>
+
+    <select id="selectByCourseAndName" resultMap="teachingClassResultMap">
+        SELECT * FROM teaching_class
+        WHERE course_id = #{courseId} AND class_name = #{className}
+    </select>
+
+    <select id="selectTeachingClassesByCourse" resultMap="teachingClassResultMap">
+        SELECT tc.*, c.course_name, c.credit
+        FROM teaching_class tc
+                 JOIN course c ON tc.course_id = c.course_id
+        WHERE tc.course_id = #{courseId}
+        ORDER BY tc.class_name
+    </select>
+
+    <select id="selectTeachingClassesByTeacher" resultMap="teachingClassResultMap">
+        SELECT tc.*, c.course_name, c.credit
+        FROM teaching_class tc
+                 JOIN course c ON tc.course_id = c.course_id
+        WHERE tc.teacher_id = #{teacherId}
+        ORDER BY c.course_name, tc.class_name
+    </select>
+
+</mapper>

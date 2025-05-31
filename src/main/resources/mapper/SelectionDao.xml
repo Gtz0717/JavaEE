@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.test_e.dao.SelectionDao">
+
+    <resultMap id="SelectionResultMap" type="com.test_e.entity.Selection">
+        <id column="selection_id" property="selection_id" />
+        <result column="student_id" property="student_id" />
+        <result column="course_id" property="course_id" />
+        <result column="score" property="score" />
+        <result column="selection_time" property="selection_time" />
+        <result column="status" property="status" />
+        <result column="evaluation" property="evaluation" />
+        <result column="evaluation_time" property="evaluation_time" />
+        <!-- 关联查询 -->
+        <association property="student" column="student_id"
+                     select="com.test_e.dao.UserDao.selectStudentWithDetails" />
+        <association property="course" column="course_id"
+                     select="com.test_e.dao.CourseDao.selectCourseById" />
+    </resultMap>
+
+    <select id="selectByStudentIdAndSemester" resultMap="SelectionResultMap">
+        SELECT s.*, c.semester
+        FROM selection s
+        JOIN course c ON s.course_id = c.course_id
+        WHERE s.student_id = #{studentId}
+        <if test="semesterId != null">
+            AND c.semester = (SELECT semester_name FROM semester WHERE semester_id = #{semesterId})
+        </if>
+        AND s.status = 'finished'
+        ORDER BY c.semester DESC, c.course_code
+    </select>
+
+    <select id="selectByCourseId" resultMap="SelectionResultMap">
+        SELECT * FROM selection
+        WHERE course_id = #{courseId}
+        ORDER BY student_id
+    </select>
+
+    <select id="selectByConditions" resultMap="SelectionResultMap">
+        SELECT s.*
+        FROM selection s
+        JOIN course c ON s.course_id = c.course_id
+        JOIN user u ON s.student_id = u.user_id
+        WHERE 1=1
+        <if test="semesterId != null">
+            AND c.semester = (SELECT semester_name FROM semester WHERE semester_id = #{semesterId})
+        </if>
+        <if test="studentId != null">
+            AND s.student_id = #{studentId}
+        </if>
+        <if test="courseId != null">
+            AND s.course_id = #{courseId}
+        </if>
+        ORDER BY c.semester DESC, c.course_code, u.real_name
+    </select>
+
+    <update id="updateById" parameterType="com.test_e.entity.Selection">
+        UPDATE selection
+        <set>
+            <if test="score != null">score = #{score},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="evaluation != null">evaluation = #{evaluation},</if>
+            <if test="evaluationTime != null">evaluation_time = #{evaluationTime},</if>
+        </set>
+        WHERE selection_id = #{selectionId}
+    </update>
+
+
+
+
+    <insert id="insertSelection" parameterType="com.test_e.entity.Selection" useGeneratedKeys="true" keyProperty="selectionId">
+        INSERT INTO selection (
+            student_id, course_id, score, selection_time,
+            status, evaluation, evaluation_time
+        ) VALUES (
+                     #{studentId}, #{courseId}, #{score}, NOW(),
+                     #{status}, #{evaluation}, #{evaluationTime}
+                 )
+    </insert>
+
+    <select id="getSelectionByStudentAndCourse" resultMap="selectionResultMap">
+        SELECT * FROM selection
+        WHERE student_id = #{studentId} AND course_id = #{courseId}
+    </select>
+
+    <update id="updateSelectionStatus">
+        UPDATE selection
+        SET status = #{status}
+        WHERE selection_id = #{selectionId}
+    </update>
+
+    <update id="updateScore">
+        UPDATE selection
+        SET score = #{score},
+            status = #{status}
+        WHERE selection_id = #{selectionId}
+    </update>
+
+    <update id="updateEvaluation">
+        UPDATE selection
+        SET evaluation = #{evaluation},
+            evaluation_time = NOW()
+        WHERE selection_id = #{selectionId}
+    </update>
+
+    <select id="getSelectionById" resultMap="selectionResultMap">
+        SELECT * FROM selection WHERE selection_id = #{selectionId}
+    </select>
+
+</mapper>

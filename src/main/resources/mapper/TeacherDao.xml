@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.test_e.mapper.TeacherMapper">
+
+    <resultMap id="teacherResultMap" type="com.test_e.entity.Teacher">
+        <id property="teacherId" column="teacher_id"/>
+        <result property="teacherNo" column="teacher_no"/>
+        <result property="title" column="title"/>
+        <result property="department" column="department"/>
+        <result property="college" column="college"/>
+        <result property="gender" column="gender"/>
+        <result property="birthDate" column="birth_date"/>
+        <!-- 关联用户基本信息 -->
+        <association property="user" javaType="com.test_e.entity.User">
+            <id property="userId" column="user_id"/>
+            <result property="username" column="username"/>
+            <result property="realName" column="real_name"/>
+            <result property="email" column="email"/>
+            <result property="phone" column="phone"/>
+        </association>
+    </resultMap>
+
+    <select id="selectTeacherById" resultMap="teacherResultMap">
+        SELECT t.*, u.username, u.real_name, u.email, u.phone
+        FROM teacher t
+                 JOIN user u ON t.teacher_id = u.user_id
+        WHERE t.teacher_id = #{teacherId}
+    </select>
+
+    <update id="updateTeacher" parameterType="com.test_e.entity.Teacher">
+        UPDATE teacher
+        SET teacher_no = #{teacherNo},
+            title = #{title},
+            department = #{department},
+            college = #{college},
+            gender = #{gender},
+            birth_date = #{birthDate}
+        WHERE teacher_id = #{teacherId}
+    </update>
+
+</mapper>

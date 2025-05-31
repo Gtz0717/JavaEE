@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.test_e.dao.SemesterDao">
+
+    <resultMap id="semesterResultMap" type="com.test_e.entity.Semester">
+        <id property="semesterId" column="semester_id"/>
+        <result property="semesterName" column="semester_name"/>
+        <result property="startDate" column="start_date"/>
+        <result property="endDate" column="end_date"/>
+        <result property="isCurrent" column="is_current"/>
+        <result property="courseSelectStart" column="course_select_start"/>
+        <result property="courseSelectEnd" column="course_select_end"/>
+    </resultMap>
+
+    <select id="selectAllSemesters" resultMap="semesterResultMap">
+        SELECT * FROM semester ORDER BY start_date DESC
+    </select>
+
+    <select id="selectCurrentSemester" resultMap="semesterResultMap">
+        SELECT * FROM semester WHERE is_current = 1 LIMIT 1
+    </select>
+
+    <select id="selectSemesterByName" resultMap="semesterResultMap">
+        SELECT * FROM semester WHERE semester_name = #{semesterName}
+    </select>
+
+    <insert id="insertSemester" parameterType="com.test_e.entity.Semester" useGeneratedKeys="true" keyProperty="semesterId">
+        INSERT INTO semester (
+            semester_name, start_date, end_date, is_current,
+            course_select_start, course_select_end
+        ) VALUES (
+                     #{semesterName}, #{startDate}, #{endDate}, #{isCurrent},
+                     #{courseSelectStart}, #{courseSelectEnd}
+                 )
+    </insert>
+
+    <update id="updateSemester" parameterType="com.test_e.entity.Semester">
+        UPDATE semester
+        SET semester_name = #{semesterName},
+            start_date = #{startDate},
+            end_date = #{endDate},
+            course_select_start = #{courseSelectStart},
+            course_select_end = #{courseSelectEnd}
+        WHERE semester_id = #{semesterId}
+    </update>
+
+    <update id="clearCurrentSemester">
+        UPDATE semester SET is_current = 0
+    </update>
+
+    <update id="setCurrentSemester">
+        UPDATE semester SET is_current = 1 WHERE semester_id = #{semesterId}
+    </update>
+
+    <update id="updateSelectionTime" parameterType="com.test_e.entity.Semester">
+        UPDATE semester
+        SET course_select_start = #{courseSelectStart},
+            course_select_end = #{courseSelectEnd}
+        WHERE semester_id = #{semesterId}
+    </update>
+
+</mapper>

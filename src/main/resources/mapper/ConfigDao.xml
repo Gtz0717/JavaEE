@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.test_e.dao.ConfigMapper">
+
+    <resultMap id="configResultMap" type="com.test_e.entity.Config">
+        <id property="configId" column="config_id"/>
+        <result property="configKey" column="config_key"/>
+        <result property="configValue" column="config_value"/>
+        <result property="description" column="description"/>
+    </resultMap>
+
+    <select id="selectAllConfigs" resultMap="configResultMap">
+        SELECT config_id, config_key, config_value, description
+        FROM config
+    </select>
+
+    <select id="selectConfigByKey" resultMap="configResultMap">
+        SELECT config_id, config_key, config_value, description
+        FROM config
+        WHERE config_key = #{key}
+    </select>
+
+    <update id="updateConfig" parameterType="com.test_e.entity.Config">
+        UPDATE config
+        SET config_value = #{configValue},
+            description = #{description}
+        WHERE config_key = #{configKey}
+    </update>
+
+</mapper>
